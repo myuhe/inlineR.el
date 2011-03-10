@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 ;;
-;; cacoo.el is very useful.
+;; cacoo.el is very cool.
 ;; You should install cacoo.el.
 ;; In detail, 
 ;; https://github.com/kiwanami/emacs-cacoo
@@ -47,8 +47,8 @@
 (defvar inlineR-default-image "png")
 (defvar inlineR-default-dir nil)
 (defvar inlineR-cairo-p nil)
-(defvar inlineR-image-size nil)
-
+(defvar inlineR-thumnail-dir ".Rimg/")
+(defvar inlineR-img-dir-ok nil)
 (defun inlineR-get-start ()
   (if (region-active-p)
       (mark)
@@ -64,16 +64,37 @@
       (concat  inlineR-default-dir file) 
     file))
 
+(defun inlineR-fix-directory ()
+  ;;バッファのカレントディレクトリに保存先ディレクトリを作る
+  ;;一応作って良いかどうか聞く
+  (let* ((img-dir (inlineR-get-dir)))
+    (unless (file-directory-p img-dir)
+      (when (or inlineR-img-dir-ok 
+                (y-or-n-p 
+                 (format "Image directory [%s] not found. Create it ?" 
+                         inlineR-thumnail-dir)))
+        (make-directory img-dir))
+      (unless (file-directory-p img-dir)
+        (error "Could not create a image directory.")))
+    img-dir))
+
 (defun inlineR-tag-concat (file)
+(if inlineR-default-dir 
+    (if (boundp 'cacoo-minor-mode)
+        (concat "\n##[img:" inlineR-default-dir file "]")
+      (concat "\n##[[" inlineR-default-dir file "]]"))
   (if (boundp 'cacoo-minor-mode)
-      (concat "\n##[img:" file "]")
-    (concat "\n##[[" file "]]")))
+      (concat "\n##[img:./" inlineR-thumnail-dir file "]")
+    (concat "\n##[[./" inlineR-thumnail-dir file "]]"))))
 
 (defun inlineR-get-dir ()
-  (unless inlineR-default-dir
-    (file-name-directory (buffer-file-name))))
+  (concat
+  (if inlineR-default-dir
+    inlineR-default-dir
+    (file-name-directory (buffer-file-name)))
+    inlineR-thumnail-dir))
 
-(defun inlineR-execute (pred format fun)
+(defun inlineR-execute (format fun)
   (if inlineR-cairo-p
       (cond
        ((string= format "svg")  
@@ -84,12 +105,12 @@
           "dev.off()\n")))
        (t (ess-command
            (concat
-            "Cairo(600, 600, \"" inlineR-default-dir filename "." format "\", type=\"" format "\", bg =\"white\" )\n"
+            "Cairo(600, 600, \"" (inlineR-get-dir) filename "." format "\", type=\"" format "\", bg =\"white\" )\n"
             fun "\n"
             "dev.off()\n"))))
     (ess-command
      (concat
-      format "(\"" inlineR-default-dir filename "." format "\")\n"
+      format "(\"" (inlineR-get-dir) filename "." format "\")\n"
       fun "\n"
       "dev.off()\n"))))
 
@@ -110,9 +131,9 @@
            (inlineR-format-alist inlineR-cairo-p) nil t inlineR-default-image))
          (filename (read-string "filename: " nil))
          (file (concat filename "." format)))
-    (inlineR-execute inlineR-cairo-p format fun)
-    (insert (inlineR-tag-concat
-             (inlineR-dir-concat file)))))
+    (inlineR-fix-directory)
+    (inlineR-execute format fun)
+    (insert (inlineR-tag-concat file))))
 
 (provide 'inlineR)
 
