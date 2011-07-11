@@ -1,12 +1,11 @@
-;;; inlineR.el
+;;; inlineR.el --- insert Tag for inline image of R graphics
 
-;; Filename: inlineR.el
-;; Description: support inline view of R_graphic
 ;; Author: myuhe <yuhei.maeda_at_gmail.com>
+;; URL: https://github.com/myuhe/e2wm-bookmark.el
+;; Version: 0.2
 ;; Maintainer: myuhe
 ;; Copyright (C) :2010, myuhe , all rights reserved.
 ;; Created: :11-02-08
-;; Version: 0.1
 ;; Keywords: convenience, iimage.el, cacoo.el
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -25,7 +24,7 @@
 ;; Boston, MA 0:110-1301, USA.
 
 ;;; Commentary:
-;;
+
 ;; cacoo.el is very cool.
 ;; You should install cacoo.el.
 ;; In detail, 
@@ -39,7 +38,7 @@
 ;; (require 'inlineR)
 ;;
 ;;; Changelog:
-;;
+;; 2011/07/11 if inlineR-cairo-p is t, load Cairo Package automatically.
 
 (require 'ess-site)
 
@@ -53,6 +52,11 @@
   (if (region-active-p)
       (mark)
     (re-search-backward inlineR-re-funcname)))
+
+(add-hook 'ess-post-run-hook 
+          (lambda ()
+            (when inlineR-cairo-p
+              (ess-execute "library(\"Cairo\")\n"))))
 
 (defun inlineR-get-end ()
   (if (region-active-p)
@@ -74,6 +78,7 @@
                  (format "Image directory [%s] not found. Create it ?" 
                          inlineR-thumnail-dir)))
         (make-directory img-dir))
+
       (unless (file-directory-p img-dir)
         (error "Could not create a image directory.")))
     img-dir))
@@ -137,3 +142,4 @@
 
 (provide 'inlineR)
 
+;;; inlineR.el ends here
