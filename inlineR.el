@@ -56,7 +56,7 @@
 (add-hook 'ess-post-run-hook 
           (lambda ()
             (when inlineR-cairo-p
-              (ess-execute "if(!require(cairo)){install.pakages(\"cairo\")}\n library(\"Cairo\")\n"))))
+              (ess-execute "if(!require(Cairo)){install.packages(\"Cairo\")}\n library(\"Cairo\")\n"))))
 
 (defun inlineR-get-end ()
   (if (region-active-p)
