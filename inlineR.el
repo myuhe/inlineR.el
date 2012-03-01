@@ -42,7 +42,7 @@
 
 (require 'ess-site)
 
-(defvar inlineR-re-funcname "plot\\|image\\|hist\\|matplot\\|barplot\\|pie\\|boxplot\\|pairs\\contour\\|persp")
+(defvar inlineR-re-funcname "[ \t\n]plot\\|image\\|hist\\|matplot\\|barplot\\|pie\\|boxplot\\|pairs\\|contour\\|persp")
 (defvar inlineR-default-image "png")
 (defvar inlineR-default-dir nil)
 (defvar inlineR-cairo-p nil)
