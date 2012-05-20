@@ -1,10 +1,10 @@
 ;;; inlineR.el --- insert Tag for inline image of R graphics
 
 ;; Author: myuhe <yuhei.maeda_at_gmail.com>
-;; URL: https://github.com/myuhe/e2wm-bookmark.el
+;; URL: https://github.com/myuhe/inlineR.el
 ;; Version: 0.2
 ;; Maintainer: myuhe
-;; Copyright (C) :2010, myuhe , all rights reserved.
+;; Copyright (C) :2010,2011,2012 myuhe all rights reserved.
 ;; Created: :11-02-08
 ;; Keywords: convenience, iimage.el, cacoo.el
 
@@ -24,7 +24,11 @@
 ;; Boston, MA 0:110-1301, USA.
 
 ;;; Commentary:
-
+;;
+;; Put the inlineR.el to your
+;; load-path.
+;; Add to .emacs:
+;; (require 'inlineR)
 ;; cacoo.el is very cool.
 ;; You should install cacoo.el.
 ;; In detail, 
@@ -38,7 +42,7 @@
 ;; (require 'inlineR)
 ;;
 ;;; Changelog:
-;; 2011/07/11 if inlineR-cairo-p is t, load Cairo Package automatically.
+;; 2011-07-11 if inlineR-cairo-p is t, load Cairo Package automatically.
 ;; 2012-05-20 bug fix for R2.15.0
 
 (require 'ess-site)
