@@ -39,24 +39,19 @@
 ;;
 ;;; Changelog:
 ;; 2011/07/11 if inlineR-cairo-p is t, load Cairo Package automatically.
+;; 2012-05-20 bug fix for R2.15.0
 
 (require 'ess-site)
 
 (defvar inlineR-re-funcname "[ \t\n]plot\\|image\\|hist\\|matplot\\|barplot\\|pie\\|boxplot\\|pairs\\|contour\\|persp")
 (defvar inlineR-default-image "png")
 (defvar inlineR-default-dir nil)
-(defvar inlineR-cairo-p nil)
 (defvar inlineR-thumnail-dir ".Rimg/")
 (defvar inlineR-img-dir-ok nil)
 (defun inlineR-get-start ()
   (if (region-active-p)
       (mark)
     (re-search-backward inlineR-re-funcname)))
-
-(add-hook 'ess-post-run-hook 
-          (lambda ()
-            (when inlineR-cairo-p
-              (ess-execute "if(!require(Cairo)){install.packages(\"Cairo\")}\n library(\"Cairo\")\n"))))
 
 (defun inlineR-get-end ()
   (if (region-active-p)
@@ -100,29 +95,28 @@
     inlineR-thumnail-dir))
 
 (defun inlineR-execute (format fun)
-  (if inlineR-cairo-p
       (cond
        ((string= format "svg")  
         (ess-command 
          (concat 
-          "CairoSVG(\"" inlineR-default-dir filename "." format "\", 3, 3)\n"
+          "svg(\"" inlineR-default-dir filename "." format "\", 3, 3)\n"
           fun "\n"
           "dev.off()\n")))
+       ((string= format "png") (ess-command
+           (concat
+            "png(width = 800, height = 800, \"" (inlineR-get-dir) filename ".png"  "\", type=\"" "cairo" "\", bg =\"white\" )\n"
+            fun "\n"
+            "dev.off()\n")))
+       ((string= format "jpeg") (ess-command
+           (concat
+            "jpeg(width = 800, height = 800, \"" (inlineR-get-dir) filename ".jpg" "\", type=\"" "cairo" "\", bg =\"white\" )\n"
+            fun "\n"
+            "dev.off()\n")))
        (t (ess-command
            (concat
-            "Cairo(600, 600, \"" (inlineR-get-dir) filename "." format "\", type=\"" format "\", bg =\"white\" )\n"
+            "Cairo(800, 800, \"" (inlineR-get-dir) filename "." format "\", type=\"" "cairo" "\", bg =\"white\" )\n"
             fun "\n"
-            "dev.off()\n"))))
-    (ess-command
-     (concat
-      format "(\"" (inlineR-get-dir) filename "." format "\")\n"
-      fun "\n"
-      "dev.off()\n"))))
-
-(defun inlineR-format-alist (pred)
-  (if pred
-      '(("png" 1) ("jpeg" 2) ("svg" 3))
-    '(("png" 1) ("jpeg" 2) ("bmp" 3))))
+            "dev.off()\n")))))
 
 (defun inlineR-insert-tag ()
   "insert image tag"
@@ -133,7 +127,7 @@
          (format 
           (completing-read
            "Image format: "
-           (inlineR-format-alist inlineR-cairo-p) nil t inlineR-default-image))
+           '(("png" 1) ("jpeg" 2) ("svg" 3)) nil t inlineR-default-image))
          (filename (read-string "filename: " nil))
          (file (concat filename "." format)))
     (inlineR-fix-directory)
